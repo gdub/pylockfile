@@ -154,8 +154,10 @@ class NotMyLock(UnlockError):
     """
     pass
 
-class LockBase:
+
+class LockBase(object):
     """Base class for platform-specific lock classes."""
+
     def __init__(self, path, threaded=True, timeout=None):
         """
         >>> lock = LockBase('somefile')
@@ -174,10 +176,10 @@ class LockBase:
         else:
             self.tname = ""
         dirname = os.path.dirname(self.lock_file)
+        self.unique_id = "%s.%s" % (self.tname, self.pid)
         self.unique_name = os.path.join(dirname,
-                                        "%s%s.%s" % (self.hostname,
-                                                     self.tname,
-                                                     self.pid))
+                                        "%s%s" % (self.hostname,
+                                                  self.unique_id))
         self.timeout = timeout
 
     def acquire(self, timeout=None):

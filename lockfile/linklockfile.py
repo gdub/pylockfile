@@ -6,6 +6,7 @@ import os
 from . import (LockBase, LockFailed, NotLocked, NotMyLock, LockTimeout,
                AlreadyLocked)
 
+
 class LinkLockFile(LockBase):
     """Lock access to a file using atomic property of link(2).
 
@@ -70,4 +71,3 @@ class LinkLockFile(LockBase):
     def break_lock(self):
         if os.path.exists(self.lock_file):
             os.unlink(self.lock_file)
-

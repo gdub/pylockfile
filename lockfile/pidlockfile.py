@@ -15,14 +15,13 @@
 from __future__ import absolute_import
 
 import os
-import sys
 import errno
 import time
 
 from . import (LockBase, AlreadyLocked, LockFailed, NotLocked, NotMyLock,
                LockTimeout)
 
-
+
 class PIDLockFile(LockBase):
     """ Lockfile implemented as a Unix PID file.
 
@@ -37,10 +36,7 @@ class PIDLockFile(LockBase):
     def __init__(self, path, threaded=False, timeout=None):
         # pid lockfiles don't support threaded operation, so always force
         # False as the threaded arg.
-        LockBase.__init__(self, path, False, timeout)
-        dirname = os.path.dirname(self.lock_file)
-        basename = os.path.split(self.path)[-1]
-        self.unique_name = self.path
+        super(PIDLockFile, self).__init__(path, False, timeout)
 
     def read_pid(self):
         """ Get the PID from the lock file.
@@ -69,6 +65,8 @@ class PIDLockFile(LockBase):
         Creates the PID file for this lock, or raises an error if
         the lock could not be acquired.
         """
+        if self.i_am_locking():
+            return
 
         timeout = timeout if timeout is not None else self.timeout
         end_time = time.time()
@@ -132,10 +130,10 @@ def read_pid_from_pidfile(pidfile_path):
         pass
     else:
         # According to the FHS 2.3 section on PID files in /var/run:
-        # 
+        #
         #   The file must consist of the process identifier in
         #   ASCII-encoded decimal, followed by a newline character.
-        # 
+        #
         #   Programs that read PID files should be somewhat flexible
         #   in what they accept; i.e., they should ignore extra
         #   whitespace, leading zeroes, absence of the trailing
@@ -170,8 +168,7 @@ def write_pid_to_pidfile(pidfile_path):
     #   example, if crond was process number 25, /var/run/crond.pid
     #   would contain three characters: two, five, and newline.
 
-    pid = os.getpid()
-    line = "%(pid)d\n" % vars()
+    line = "%d\n" % os.getpid()
     pidfile.write(line)
     pidfile.close()
 
